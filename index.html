@@ -13,7 +13,7 @@
     <script src="https://cdn.bootcss.com/pixi.js/4.4.4/pixi.js"></script>
     <title>Document</title>
     <script>
-        var fontSize, dpr;
+        var dpr;
         ! function (a) {
             function b() {
                 if (a.navigator.appVersion.match(/window/gi)) {
@@ -23,7 +23,6 @@
                 }
                 a.rem = m / 16,
                     f.style.fontSize = a.rem + "px";
-                fontSize = a.rem;
             }
             var c,
                 d = a.navigator.appVersion.match(/iphone/gi) ? a.devicePixelRatio : 1,
@@ -101,11 +100,7 @@
                 resources = PIXI.loader.resources,
                 Sprite = PIXI.Sprite;
             //初始化
-            console.log(window.innerWidth / 640);
-            console.log(window.innerWidth);
-            var radio = window.innerWidth / 640;
-            var radio2 = fontSize / 10;
-            console.log(radio2, 'radio2')
+            var radio2 = 10;
             var renderer = autoDetectRenderer(640 * radio2, 1008 * radio2,
                 { antialias: false, transparent: false, resolution: dpr }//抗锯齿，透明，分辨率
             );
