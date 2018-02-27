@@ -1,0 +1,25 @@
+@function re($px) {
+    @return $px/20/2+rem;
+}
+@mixin bg($name) {
+    background-image: url(#{$url+$name});
+    background-size: 100% auto;
+    background-repeat: no-repeat;
+    background-position: center top;
+    overflow: hidden;
+}
+
+
+//主背景色
+$bg-color: #d6bf9c;
+
+@mixin title_style($lineheight) {
+    font-size: re(24);
+    color: #ffedc5;
+    line-height: $lineheight;
+}
+@mixin part-style() {
+    margin: 0 auto;
+    overflow: hidden;
+    border-radius: re(16);
+}

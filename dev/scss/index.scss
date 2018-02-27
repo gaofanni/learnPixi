@@ -1,0 +1,29 @@
+/*===reset-star===*/
+@import './reset.scss';
+@import './config.scss';
+@import './images.scss';
+
+
+@function re($px) {
+    @return $px/20/2+rem;
+}
+
+@mixin bg($name) {
+    background-image: url(#{$url+$name});
+    background-size: 100% auto;
+    background-repeat: no-repeat;
+    background-position: center top;
+    overflow: hidden;
+}
+html,body,#app {
+    width: re(640);
+    height: 100%;
+    // background-color: #000;
+}
+
+canvas {
+    width: re(640);
+    height: re(1008);
+}
+
+
