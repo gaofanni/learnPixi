@@ -1,3 +1,39 @@
+
+// 键盘事件
+class Keyboard {
+    constructor(keycode) {
+        this.code = keycode;
+        this.isDown = false
+        this.isUp = true;
+        this.press = undefined
+        this.release = undefined
+        this.init()
+    }
+    downHandler(e) {
+        if (e.keyCode == this.code) {
+            if (this.isUp && this.press) {
+                this.press()
+            }
+            this.isDown = true;
+            this.isUp = false
+        }
+        e.preventDefault()
+    }
+    upHandler(e) {
+        if (e.keyCode == this.code) {
+            if (this.isDown && this.release) {
+                this.release()
+            }
+            this.isDown = false;
+            this.isUp = true
+        }
+        e.preventDefault()
+    }
+    init() {
+        window.addEventListener('keydown', this.downHandler.bind(this), false)
+        window.addEventListener('keyup', this.upHandler.bind(this), false)
+    }
+}
 class App {
     constructor() {
         this.init();
@@ -28,11 +64,22 @@ class App {
 
     mount() {
         document.querySelector('#app').appendChild(this.renderer.view)
+        /* 缩放至可视宽高 */
         this.renderer.view.style.display = 'block';
         this.renderer.view.style.width = (window.innerWidth) + 'px';
     }
     draw() {
-
+        let { radio2, stage, group, renderer, Sprite, resources, Graphics, Text, loader, Texture } = this;
+        this.drawGrapgics()
+        this.drawSprite()
+        this.drawSriteFromImage()
+        animate()
+        function animate() {
+            requestAnimationFrame(animate)
+            renderer.render(stage)
+        }
+    }
+    drawGrapgics() {
         let { radio2, stage, group, renderer, Sprite, resources, Graphics, Text, loader, Texture } = this;
 
         var graphics = new Graphics();
@@ -47,23 +94,21 @@ class App {
 
         //手绘线条
         var line = new Graphics();
-        // line.lineStyle(1, '0xffffff', 1).moveTo(0, 0).lineTo(360, 600);
         var before = { x: null, y: null };
         var stop = false;
-        // document.addEventListener('touchmove', function (e) {
-        //     // console.log(e.touches[0].clientX, e.touches[0].clientY)
-        //     if (new Date().getTime() - stop > 100) {
-        //         before = { x: null, y: null };
-        //     }
-        //     var x = e.changedTouches[0].pageX;
-        //     var y = e.changedTouches[0].pageY;
-        //     line.lineStyle(10, '0xffffff', 1).moveTo(before.x ? before.x : (x - 1), before.y ? before.y : (y - 1)).lineTo(x + 1, y + 1);
-        //     before = {
-        //         x: x,
-        //         y: y
-        //     };
-        //     stop = new Date().getTime();
-        // }, false)
+        document.addEventListener('touchmove', function (e) {
+            if (new Date().getTime() - stop > 100) {
+                before = { x: null, y: null };
+            }
+            var x = e.changedTouches[0].pageX;
+            var y = e.changedTouches[0].pageY;
+            line.lineStyle(10 * radio2, '0xffffff', 1).moveTo(before.x * radio2 ? before.x * radio2 : (x - 1) * radio2, before.y * radio2 ? before.y * radio2 : (y - 1) * radio2).lineTo((x + 1) * radio2, (y + 1) * radio2);
+            before = {
+                x: x,
+                y: y
+            };
+            stop = new Date().getTime();
+        }, false)
 
         //多边形
         var tri = new Graphics();
@@ -93,44 +138,11 @@ class App {
         console.log(graphics.x)//分组位置
         console.log(graphics.getGlobalPosition())//分组位置
         /* 无非load自动加载 */
-        // stage.addChild(PIXI.Sprite.fromImage('./assets/shipin.png'));
+        stage.addChild(PIXI.Sprite.fromImage('./images/assets/shipin.png'));
         stage.addChild(group)
-
-        // 键盘事件
-        // class Keyboard {
-        //     constructor(keycode) {
-        //         this.code = keycode;
-        //         this.isDown = false
-        //         this.isUp = true;
-        //         this.press = undefined
-        //         this.release = undefined
-        //         this.init()
-        //     }
-        //     downHandler(e) {
-        //         if (e.keyCode == this.code) {
-        //             if (this.isUp && this.press) {
-        //                 this.press()
-        //             }
-        //             this.isDown = true;
-        //             this.isUp = false
-        //         }
-        //         e.preventDefault()
-        //     }
-        //     upHandler(e) {
-        //         if (e.keyCode == this.code) {
-        //             if (this.isDown && this.release) {
-        //                 this.release()
-        //             }
-        //             this.isDown = false;
-        //             this.isUp = true
-        //         }
-        //         e.preventDefault()
-        //     }
-        //     init() {
-        //         window.addEventListener('keydown', this.downHandler.bind(this), false)
-        //         window.addEventListener('keyup', this.upHandler.bind(this), false)
-        //     }
-        // }
+    }
+    drawSprite() {
+        let { radio2, stage, group, renderer, Sprite, resources, Graphics, Text, loader, Texture } = this;
         //精灵
         //加载器
         PIXI.loader
@@ -138,6 +150,7 @@ class App {
             .add('./images/assets/test.json')//加载json文件
             // .add('./assets/box_open.png')//加载单张图片
             .on('progress', function (loader, resource) {
+                /* 进度条 */
                 console.log(resource, 'progress-resource')
                 console.log(loader, 'progress-loader')
             })
@@ -154,61 +167,95 @@ class App {
                 }
                 for (var n in arr) {
                     arr[n].position.set((n + 10) * radio2, 0)
+                    /* 雪碧图动画初始化数据 */
                     arr[n] = Object.assign(arr[n], {
                         width: arr[n].width * radio2,
                         height: arr[n].height * radio2,
-                        accelerationX: 1 * radio2,
-                        accelerationY: 2 * radio2,
-                        frictionX: 1 * radio2,
-                        frictionY: 1 * radio2,
-                        speed: 0.1,
-                        drag: 0.98 * radio2,
+                        accelerationX: 0,/* 加速度 */
+                        accelerationY: 0,
+                        frictionX: 1,/* 阻力，减速 */
+                        frictionY: 1,
+                        speed: 0.3,
+                        drag: 0.98,
                         vx: 1,
                         vy: 1
-                    })
+                    });
+                    arr[n].jiasu = true
+                    arr[n].forward = true
                     stage.addChild(arr[n])
                 }
-                setTimeout(function () {
-                    //截取雪碧图
-                    // sprite.texture = PIXI.utils.TextureCache['布-L.png'];
-                    //键盘移动
-                    // var right = new Keyboard(39);
-                    // right.press = function () {
-                    //     sprite.x += 5
-                    //     sprite.y += 10
-                    // }
-                    // right.release = function () {
+                // setTimeout(function () {
+                //     /* 切换图片 */
+                //     //截取雪碧图
+                //     arr[0].texture = PIXI.utils.TextureCache['布-L.png'];
+                //     //键盘移动
+                //     var right = new Keyboard(39);
+                //     right.press = function () {
+                //         arr[0].x += 1
+                //         arr[0].y += 1
+                //     }
+                //     right.release = function () {
 
-                    // }
-                    function moving() {
-                        requestAnimationFrame(moving)
-                        //自动移动
-                        for (var n in arr) {
-                            if (arr[n].x < 640 * radio2) {
-                                arr[n].vx += arr[n].accelerationX
-                                arr[n].vy += arr[n].accelerationY
-                                arr[n].vx *= arr[n].frictionX
-                                arr[n].vy *= arr[n].frictionY
-                                arr[n].x += arr[n].vx
-                                arr[n].y += arr[n].vy
-                                console.log(arr[n].vx, arr[n].vy)
-                                // arr[n].x += (2 * radio2)
-                                // arr[n].y += (2 * radio2)
+                //     }
+                // }, 1000);
+                /* 图片移动 */
+                function spriteMove(el, back) {
+                    if (back) {
+                        el.vx -= el.accelerationX
+                    } else {
+                        el.vx += el.accelerationX
+                    }
+                    el.vx *= el.frictionX
+                    el.x += el.vx
+                }
+                function jiasu(el, back) {
+                    el.accelerationX = el.speed
+                    el.frictionX = 1
+                    spriteMove(el, back)
+                }
+                function jiansu(el, back) {
+                    el.accelerationX = 0
+                    el.frictionX = el.drag
+                    spriteMove(el, back)
+                }
+                function play() {
+                    /* 摇晃效果+碰撞检测 */
+                    for (var n in arr) {
+                        if (arr[n].x < (640 * radio2 / 2)) {
+                            if (arr[n].forward) {
+                                jiasu(arr[n])
                             } else {
-                                // arr[n].x = 0
-                                // arr[n].y = 0
-                                // arr[n].vx = 1
-                                // arr[n].vy = 1
+                                jiansu(arr[n], true)
+                                if (arr[n].x < 0) {
+                                    arr[n].forward = true
+                                }
+                            }
+                        } else {
+                            if (arr[n].forward) {
+                                jiansu(arr[n])
+                                if (arr[n].x >= (640 * radio2 - 100)) {
+                                    arr[n].forward = false
+                                }
+                            } else {
+                                jiasu(arr[n], true)
                             }
                         }
                     }
-                    moving()
-                    // var rectangle = new PIXI.Rectangle(0, 0, 222, 222)
-                    // texture.frame = rectangle;
-                    // sprite.texture = texture;
-                }, 1000);
+                }
+                let state;
+                state = play;
+                function moving() {
+                    requestAnimationFrame(moving)
+                    //自动移动
+                    state()
+                }
+                moving()
             })
 
+
+    }
+    drawSriteFromImage() {
+        let { radio2, stage, group, renderer, Sprite, resources, Graphics, Text, loader, Texture } = this;
         //image对象加载
         var img = new Image();
         img.crossOrigin = "Anonymous";//允许跨域
@@ -226,14 +273,7 @@ class App {
             imgSprite.rotation = Math.PI / 180 * 30;
             stage.addChild(imgSprite)
         }
-
-        animate()
-        function animate() {
-            requestAnimationFrame(animate)
-            renderer.render(stage)
-        }
     }
-
 
 }
 $(function () {
