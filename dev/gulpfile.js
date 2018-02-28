@@ -25,7 +25,7 @@ var src = {
     sass: './' + project + '/dev/scss/**/*.scss',
     js: './' + project + '/dev/js/**/*.js',
     views: './' + project + '/dev/*.html',
-    images: './' + project + '/dev/images/**/*.{jpg,png,jpeg}',
+    images: './' + project + '/dev/images/**/*.{jpg,png,jpeg,json}',
     lib: './' + project + '/dev/lib/**/*.js'
 };
 var dev = './' + project + '/dev/';
@@ -49,7 +49,7 @@ var sequence = require('run-sequence');
 var base64 = require('gulp-base64');
 
 
-gulp.task('css', function() {
+gulp.task('css', function () {
     gulp.src(src.sass)
         .pipe(plumber())
         .pipe(prefixer({
@@ -62,11 +62,11 @@ gulp.task('css', function() {
             maxImageSize: 12 * 1024, // bytes
             debug: false
         }))
-        .pipe(miniCss())      
+        .pipe(miniCss())
         .pipe(gulp.dest(dist + '/css/'))
         .pipe(connect.reload())
 });
-gulp.task('js', function() {
+gulp.task('js', function () {
     gulp.src(src.js)
         .pipe(plumber())
         .pipe(babel())
@@ -74,17 +74,18 @@ gulp.task('js', function() {
         .pipe(gulp.dest(dist + '/js/'))
         .pipe(connect.reload())
 });
-gulp.task('image', function() {
+gulp.task('image', function () {
     gulp.src(src.images)
         .pipe(gulp.dest(dist + 'images'))
         .pipe(connect.reload());
 });
-gulp.task('server', function() {
+gulp.task('server', function () {
     connect.server({
         livereload: true,
+        host: '::',
         root: '../',
         port: 7777,
-        middleware: function(connect, opt) {
+        middleware: function (connect, opt) {
             return [
                 proxy('/apiRedirect', {
                     target: 'http://localhost:4040/',
@@ -95,22 +96,22 @@ gulp.task('server', function() {
     });
 });
 
-gulp.task('lib', function() {
+gulp.task('lib', function () {
     gulp.src(src.lib)
         .pipe(gulp.dest(dist + '/lib'))
         .pipe(connect.reload())
 });
-gulp.task('html', function() {
+gulp.task('html', function () {
     gulp.src(src.views)
         .pipe(gulp.dest(dist + '/'))
         .pipe(connect.reload())
 });
-gulp.task('build', function() {
-    sequence('image', 'css', 'js', 'lib','html');
+gulp.task('build', function () {
+    sequence('image', 'css', 'js', 'lib', 'html');
 });
 gulp.task('default', function () {
     gulp.start('server');
-    watch([src.images,src.lib,src.sass,src.js,src.views]).on('change', function () {
+    watch([src.images, src.lib, src.sass, src.js, src.views]).on('change', function () {
         gulp.start('build')
     });
 });
