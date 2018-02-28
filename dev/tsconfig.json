@@ -1,0 +1,7 @@
+{
+    "compilerOptions": {
+        "noImplicitAny": false,
+        "target": "es3",
+        "lib": ["dom","es5","es2015","dom.iterable","scripthost"],    
+    }
+}

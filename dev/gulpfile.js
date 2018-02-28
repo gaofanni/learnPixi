@@ -16,39 +16,31 @@
  * 11.自动给css加兼容性前缀 autoprefixer
  * 12.图片压缩和输出
  */
-
-//在这里配置要编译的项目
-// var project = 'app-wap';
 var project = '../';
-
 var src = {
     sass: './' + project + '/dev/scss/**/*.scss',
-    js: './' + project + '/dev/js/**/*.js',
+    js: './' + project + '/dev/js/**/*.{js,ts}',
     views: './' + project + '/dev/*.html',
-    images: './' + project + '/dev/images/**/*.{jpg,png,jpeg}',
+    images: './' + project + '/dev/images/**/*.{jpg,png,jpeg,json}',
     lib: './' + project + '/dev/lib/**/*.js'
 };
 var dev = './' + project + '/dev/';
-// var dist = './' + project + '/release/';
 var dist = '../dist/'
 var gulp = require('gulp');
-
 var concat = require('gulp-concat');
 var miniCss = require('gulp-minify-css');
 var uglify = require('gulp-uglify');
-var babel = require('gulp-babel');
+// var babel = require('gulp-babel');
+var ts = require("gulp-typescript");
+var tsProject = ts.createProject("tsconfig.json");
 var sass = require('gulp-sass');
 var prefixer = require('gulp-autoprefixer');
-
 var plumber = require('gulp-plumber');
 var watch = require('gulp-watch');
 var connect = require('gulp-connect');
 var proxy = require('http-proxy-middleware');
 var sequence = require('run-sequence');
-
 var base64 = require('gulp-base64');
-
-
 gulp.task('css', function() {
     gulp.src(src.sass)
         .pipe(plumber())
@@ -69,7 +61,7 @@ gulp.task('css', function() {
 gulp.task('js', function() {
     gulp.src(src.js)
         .pipe(plumber())
-        .pipe(babel())
+        .pipe(tsProject())
         .pipe(uglify())
         .pipe(gulp.dest(dist + '/js/'))
         .pipe(connect.reload())
@@ -82,6 +74,7 @@ gulp.task('image', function() {
 gulp.task('server', function() {
     connect.server({
         livereload: true,
+        host: '::',
         root: '../',
         port: 7777,
         middleware: function(connect, opt) {
@@ -94,7 +87,6 @@ gulp.task('server', function() {
         }
     });
 });
-
 gulp.task('lib', function() {
     gulp.src(src.lib)
         .pipe(gulp.dest(dist + '/lib'))

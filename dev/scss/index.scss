@@ -16,14 +16,19 @@
     overflow: hidden;
 }
 html,body,#app {
-    width: re(640);
+    width:100%;
     height: 100%;
     // background-color: #000;
+    overflow: auto;
 }
 
 canvas {
+    // transform: scale(.1);
+    // transform-origin: left top;
     width: re(640);
+    // height: auto;
     height: re(1008);
+    background-color: #000;
 }
 
 

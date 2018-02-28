@@ -1,0 +1,88 @@
+{
+	"frames": {
+		"分享图尺寸：124_124.jpg": {
+			"frame": {
+				"x": 0,
+				"y": 0,
+				"w": 124,
+				"h": 124
+			},
+			"rotated": false,
+			"trimmed": false,
+			"spriteSourceSize": {
+				"x": 0,
+				"y": 0,
+				"w": 124,
+				"h": 124
+			},
+			"sourceSize": {
+				"w": 124,
+				"h": 124
+			},
+			"pivot": {
+				"x": 0.5,
+				"y": 0.5
+			}
+		},
+		"布-L.png": {
+			"frame": {
+				"x": 0,
+				"y": 124,
+				"w": 100,
+				"h": 177
+			},
+			"rotated": false,
+			"trimmed": false,
+			"spriteSourceSize": {
+				"x": 0,
+				"y": 0,
+				"w": 100,
+				"h": 177
+			},
+			"sourceSize": {
+				"w": 100,
+				"h": 177
+			},
+			"pivot": {
+				"x": 0.5,
+				"y": 0.5
+			}
+		},
+		"布-r.png": {
+			"frame": {
+				"x": 0,
+				"y": 301,
+				"w": 100,
+				"h": 177
+			},
+			"rotated": false,
+			"trimmed": false,
+			"spriteSourceSize": {
+				"x": 0,
+				"y": 0,
+				"w": 100,
+				"h": 177
+			},
+			"sourceSize": {
+				"w": 100,
+				"h": 177
+			},
+			"pivot": {
+				"x": 0.5,
+				"y": 0.5
+			}
+		}
+	},
+	"meta": {
+		"app": "https://www.codeandweb.com/texturepacker",
+		"version": "1.0",
+		"image": "test.png",
+		"format": "RGBA8888",
+		"size": {
+			"w": 124,
+			"h": 478
+		},
+		"scale": "1",
+		"smartupdate": "$TexturePacker:SmartUpdate:b05a044aa98507b7e4095112382afe0b:cf6f2345cc3270435598af8b02ea3450:02ab132358d6d8b512e80119463a8329$"
+	}
+}
