@@ -49,11 +49,14 @@ class App {
     Text = PIXI.Text
     radio2 = window.innerWidth / 640 * 2;
     renderer = this.autoDetectRenderer(640 * this.radio2, 1008 * this.radio2,
-        { antialias: true, transparent: false, resolution: 1 }//抗锯齿，透明，分辨率
+        { antialias: false, transparent: false, resolution: 1 }//抗锯齿，透明，分辨率
     );
     stage = new this.Container();
     group = new this.Container();
     graphics = new this.Graphics();
+    size = (num) => {
+        return num * this.radio2
+    }
 
     init() {
         console.log(window.dpr, 'dpr');
@@ -69,18 +72,54 @@ class App {
         this.renderer.view.style.width = (window.innerWidth) + 'px';
     }
     draw() {
-        let { radio2, stage, group, renderer, Sprite, resources, Graphics, Text, loader, Texture } = this;
+        let { radio2, stage, group, renderer, Sprite, resources, Graphics, Text, loader, Texture, size } = this;
         this.drawGrapgics()
         this.drawSprite()
         this.drawSriteFromImage()
+        this.drawAnimationLine()
         animate()
         function animate() {
             requestAnimationFrame(animate)
             renderer.render(stage)
         }
     }
+    drawAnimationLine() {
+        /* 两点连线圆形运动 */
+        let { radio2, stage, group, renderer, Sprite, resources, Graphics, Text, loader, Texture, size } = this;
+        let line = new Graphics;
+        stage.addChild(line)
+        line.angleA = 0;
+        line.angleB = 0;
+        let state;
+        let rotateAroundPoint = (pointX, pointY, distanceX, distanceY, angle) => {
+            let point = {}
+            point.x = pointX + Math.cos(angle) * distanceX
+            point.y = pointY + Math.sin(angle) * distanceY
+            return point
+        }
+        let play = () => {
+            line.angleA += size(0.02);
+            let rotatingA = rotateAroundPoint(size(164), size(64), size(80), size(20), line.angleA);
+
+            line.angleB -= size(0.03)
+            let rotatingB = rotateAroundPoint(size(164), size(208), size(80), size(20), line.angleB);
+
+            line.clear()
+
+            line.lineStyle(size(4), 0xffffff, 1)
+                .moveTo(rotatingA.x, rotatingA.y)
+                .lineTo(rotatingB.x, rotatingB.y)
+        }
+        state = play
+        let gameLoop = () => {
+            requestAnimationFrame(gameLoop)
+            state()
+            renderer.render(stage)
+        }
+        gameLoop()
+    }
     drawGrapgics() {
-        let { radio2, stage, group, renderer, Sprite, resources, Graphics, Text, loader, Texture } = this;
+        let { radio2, stage, group, renderer, Sprite, resources, Graphics, Text, loader, Texture, size } = this;
 
         var graphics = new Graphics();
         graphics.beginFill('0x061639').lineStyle(1 * radio2, '0xffffff', 1).drawRect(50 * radio2, 250 * radio2, 120 * radio2, 120 * radio2).endFill();
@@ -128,6 +167,35 @@ class App {
         )
         msg.position.set(100 * radio2, 100 * radio2);
 
+        // 二次方程曲线
+        let quadline = new Graphics();
+        quadline.lineStyle(size(4), 0xffffff, size(1)).moveTo(size(32), size(128)).quadraticCurveTo(size(128), size(20), size(224), size(128));
+        /* 平滑处理,定位会改变 */
+        let quadTexture = quadline.generateTexture();
+        let quadSprite = new Sprite(quadTexture)
+        console.log(quadline.position, 'quad')
+        group.addChild(quadSprite)
+
+        // 贝塞尔曲线
+        let bazierLine = new Graphics();
+        bazierLine
+            .lineStyle(size(4), 0xffffff, size(1))
+            .moveTo(size(32), size(228))
+            .bezierCurveTo(size(32), size(50), size(224), size(50), size(224), size(228));
+        /* 一个实例化graphics可以绘制多条曲线 */
+        bazierLine
+            .lineStyle(size(20), 0xf75555, size(1))
+            .moveTo(size(66), size(228))
+            .bezierCurveTo(size(66), size(50), size(224), size(50), size(284), size(228));
+        group.addChild(bazierLine)
+
+        // 画弧度-基于圆
+        let partialCircle = new Graphics();
+        partialCircle
+            .lineStyle(size(14), 0xffffff, size(1))
+            .arc(size(64), size(64), size(200), 0, Math.PI, false)
+        group.addChild(partialCircle)
+
         group.addChild(graphics)
         group.addChild(graphics1)
         group.addChild(graphics2)
@@ -135,6 +203,7 @@ class App {
         stage.addChild(line)
         stage.addChild(msg)
         group.position.set(200 * radio2, 200 * radio2);
+        group.backgroundColor = '0xffffff'
         console.log(graphics.x)//分组位置
         console.log(graphics.getGlobalPosition())//分组位置
         /* 无非load自动加载 */
@@ -264,13 +333,14 @@ class App {
             var base = new PIXI.BaseTexture(img);
             var texture = new PIXI.Texture(base)
             var imgSprite = new PIXI.Sprite(texture)
-            imgSprite.position.set(100 * radio2, 600 * radio2);
+            imgSprite.position.set(0 * radio2, 600 * radio2);
             console.log(imgSprite.width, imgSprite.height, 'imgSprite')
-            imgSprite.scale.set(1, 1);
+            imgSprite.scale.set(0.5, 0.5);
             imgSprite.width *= radio2;
             imgSprite.height *= radio2;
             // imgSprite.anchor.set(0.5, 0.5);
-            imgSprite.rotation = Math.PI / 180 * 30;
+            imgSprite.pivot.set(imgSprite.width / 2, imgSprite.width / 2);
+            imgSprite.rotation = Math.PI / 180 * 45;
             stage.addChild(imgSprite)
         }
     }
