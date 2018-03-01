@@ -48,6 +48,9 @@ class App {
     Texture = PIXI.Texture
     Text = PIXI.Text
     radio2 = window.innerWidth / 640 * 2;
+    bump = new Bump(PIXI);
+    su = new SpriteUtilities(PIXI)
+    d = new Dust(PIXI)
     renderer = this.autoDetectRenderer(640 * this.radio2, 1008 * this.radio2,
         { antialias: false, transparent: false, resolution: 1 }//抗锯齿，透明，分辨率
     );
@@ -72,22 +75,199 @@ class App {
         this.renderer.view.style.width = (window.innerWidth) + 'px';
     }
     draw() {
-        let { radio2, stage, group, renderer, Sprite, resources, Graphics, Text, loader, Texture, size } = this;
+        let { radio2, stage, group, renderer, Sprite, resources, Graphics, Text, loader, Texture, size, d } = this;
         this.drawGrapgics()
-        this.drawSprite()
-        this.drawSriteFromImage()
-        this.drawAnimationLine()
+        // this.keyframeAnimation()
+        // this.drawSprite()
+        // this.drawSriteFromImage()
+        // this.drawAnimationLine()
+        // this.drwaParticles()
+        // this.drawTiling()
         animate()
         function animate() {
             requestAnimationFrame(animate)
+            d.update()
             renderer.render(stage)
         }
+    }
+    drawTiling() {
+        let { radio2, stage, group, renderer, Sprite, resources, Graphics, Text, loader, Texture, size, d } = this;
+        PIXI.loader.add('./images/assets/box_open.png')
+            .load(() => {
+                //prepare circle texture, that will be our brush
+                var brush = new PIXI.Graphics();
+                brush.beginFill(0xffffff);
+                brush.drawCircle(0, 0, size(50));
+                brush.endFill();
+
+                let graphics = new Graphics()
+                graphics.beginFill(0xf75555).drawRect(0, 0, size(window.innerWidth), size(window.innerHeight))
+                stage.addChild(graphics)
+
+
+                let texture = PIXI.loader.resources['./images/assets/box_open.png'].texture;
+                let tilingSprite = new PIXI.extras.TilingSprite(texture, size(window.innerWidth), size(window.innerHeight))
+                tilingSprite.tilePosition.x = size(32);
+                tilingSprite.tileScale.x = 1.5;
+                stage.addChild(tilingSprite)
+
+                let renderTexture = new PIXI.RenderTexture.create(size(window.innerWidth), size(window.innerHeight))
+                let renderTextureSprite = new Sprite(renderTexture)
+                stage.addChild(renderTextureSprite)
+                tilingSprite.mask = renderTextureSprite
+
+
+                // brush.position.set(0, 0);
+                // renderer.render(brush, renderTexture, false, null, false);
+
+                stage.interactive = true;
+                stage.on('pointerdown', pointerDown);
+                stage.on('pointerup', pointerUp);
+                stage.on('pointermove', pointerMove);
+
+                var dragging = false;
+
+                function pointerMove(event) {
+                    if (dragging) {
+                        brush.position.copy(event.data.global);
+                        /* 复制笔刷给renderTexture */
+                        renderer.render(brush, renderTexture, false, null, false);
+                    }
+                }
+
+                function pointerDown(event) {
+                    dragging = true;
+                    pointerMove(event);
+                }
+
+                function pointerUp(event) {
+                    dragging = false;
+                }
+                // setInterval(() => {
+                //     tilingSprite.tilePosition.x -= size(1);
+                // }, 100)
+            })
+    }
+    /* 粒子动画 */
+    drwaParticles() {
+        let { radio2, stage, group, renderer, Sprite, resources, Graphics, Text, loader, Texture, size, d } = this;
+        PIXI.loader
+            .add('./images/assets/star.jpg')
+            .load(() => {
+                let starContainer = new PIXI.ParticleContainer()
+                stage.addChild(starContainer)
+                // d.create(
+                //     size(window.innerWidth) / 2,
+                //     size(window.innerHeight) / 2,
+                //     () => {
+                //         return this.su.sprite('./images/assets/star.jpg')
+                //     },
+                //     starContainer,
+                //     50,
+                //     0.1,
+                //     true,
+                //     0, Math.PI * 2,/* 分散角度 */
+                //     size(4), size(4),/* 尺寸 */
+                //     1, 10,/* 速度 */
+                //     1, 1,/* 扩散速度 */
+                //     0.005, 0.01,/* 透明速度 */
+                //     0.05, 0.1,/* 旋转速度 */
+                // )
+                let particleStream = d.emitter(
+                    100,
+                    () => d.create(
+                        size(window.innerWidth) / 2,
+                        size(window.innerHeight) / 2,
+                        () => {
+                            return this.su.sprite('./images/assets/star.jpg')
+                        },
+                        starContainer,
+                        50,
+                        0,
+                        true,
+                        0, Math.PI * 2,/* 分散角度 */
+                        size(4), size(4),/* 尺寸 */
+                        1, 2,/* 速度 */
+                        1, 1,/* 扩散速度 */
+                        0.005, 0.01,/* 透明速度 */
+                        0.05, 0.1,/* 旋转速度 */
+                    )
+                )
+                particleStream.play()
+                setTimeout(() => {
+                    particleStream.stop()
+                }, 1000);
+            })
+    }
+    keyframeAnimation() {
+        let { radio2, stage, group, renderer, Sprite, resources, Graphics, Text, loader, Texture, size, su } = this;
+        PIXI.loader
+            .add('./images/assets/timg.jpg')
+            .load(() => {
+                // let texture = resources['./images/assets/shipin.png'].texture
+                // let sprite = new Sprite(texture)
+                // stage.addChild(sprite)
+
+                let frames = su.filmstrip('./images/assets/timg.jpg', 59, 93)
+                let sprite = su.sprite(frames)
+                sprite.states = {
+                    down: 0,
+                    left: 4,
+                    right: 8,
+                    up: 12,
+                    walkDown: [0, 3],
+                    walkLeft: [4, 7],
+                    walkRight: [8, 11],
+                    walkUp: [12, 15]
+                }
+                sprite.show(sprite.states.left)
+                sprite.scale.set(10, 10)
+                sprite.animationSpeed = 0.2;
+                sprite.fps = 8
+                // sprite.gotoAndStop(10);
+                sprite.loop = true
+                sprite.onComplete = () => {
+                    console.log(1)
+                }
+                stage.addChild(sprite)
+                sprite.vx = 0;
+                let left = new Keyboard(37)
+                left.press = () => {
+                    sprite.playAnimation(sprite.states.walkLeft)
+                    sprite.vx = -1
+                    sprite.vy = 0
+                }
+                left.release = () => {
+                    if (!right.isDown && sprite.vy == 0) {
+                        sprite.vx = 0;
+                        sprite.show(sprite.states.left)
+                    }
+                }
+                let right = new Keyboard(39)
+                right.press = () => {
+                    sprite.playAnimation(sprite.states.walkRight)
+                    sprite.vx = 1
+                    sprite.vy = 0
+                }
+                right.release = () => {
+                    if (!left.isDown && sprite.vy == 0) {
+                        sprite.vx = 0;
+                        sprite.show(sprite.states.right)
+                    }
+                }
+                let move = () => {
+                    requestAnimationFrame(move)
+                    sprite.x += sprite.vx
+                }
+                move()
+            })
     }
     drawAnimationLine() {
         /* 两点连线圆形运动 */
         let { radio2, stage, group, renderer, Sprite, resources, Graphics, Text, loader, Texture, size } = this;
         let line = new Graphics;
         stage.addChild(line)
+        stage.cacheAsBitmap = true;
         line.angleA = 0;
         line.angleB = 0;
         let state;
@@ -126,9 +306,13 @@ class App {
 
         var graphics1 = new Graphics();
         graphics1.beginFill('0xf75555').lineStyle(1 * radio2, '0xffffff', 1).drawRect(100 * radio2, 350 * radio2, 120 * radio2, 120 * radio2).endFill();
+        graphics1.position.set(size(100), size(100))
+
 
         var graphics2 = new Graphics();
-        graphics2.beginFill('0x061639').drawEllipse(220 * radio2, 490 * radio2, 70 * radio2, 120 * radio2).endFill();
+        graphics2.beginFill('0x999999').drawEllipse(220 * radio2, 490 * radio2, 70 * radio2, 120 * radio2).endFill();
+        graphics2.blendMode = PIXI.BLEND_MODES.SCREEN
+        // graphics2.blendMode = PIXI.BLEND_MODES.MULTIPLY
         // graphics2.beginFill('0x061639').drawEllipse(220 , 490 , 70 , 120 ).endFill();
 
         //手绘线条
@@ -181,13 +365,16 @@ class App {
         bazierLine
             .lineStyle(size(4), 0xffffff, size(1))
             .moveTo(size(32), size(228))
-            .bezierCurveTo(size(32), size(50), size(224), size(50), size(224), size(228));
+            .bezierCurveTo(size(32), size(50), size(224), size(50), size(224), size(228))
+            .tint = 0xf75555;
         /* 一个实例化graphics可以绘制多条曲线 */
         bazierLine
             .lineStyle(size(20), 0xf75555, size(1))
             .moveTo(size(66), size(228))
             .bezierCurveTo(size(66), size(50), size(224), size(50), size(284), size(228));
         group.addChild(bazierLine)
+
+
 
         // 画弧度-基于圆
         let partialCircle = new Graphics();
@@ -211,7 +398,7 @@ class App {
         stage.addChild(group)
     }
     drawSprite() {
-        let { radio2, stage, group, renderer, Sprite, resources, Graphics, Text, loader, Texture } = this;
+        let { radio2, stage, group, renderer, Sprite, resources, Graphics, Text, loader, Texture, bump } = this;
         //精灵
         //加载器
         PIXI.loader
@@ -251,6 +438,7 @@ class App {
                     });
                     arr[n].jiasu = true
                     arr[n].forward = true
+                    arr[n].tint = 0xff3300;/* 染色 */
                     stage.addChild(arr[n])
                 }
                 // setTimeout(function () {
@@ -319,6 +507,12 @@ class App {
                     state()
                 }
                 moving()
+                /* Bump碰撞检测 */
+                // let addOne = new Sprite(resources['./images/assets/test.json'].textures['布-L.png']); addOne.position.set(300, 300);
+                // stage.addChild(addOne)
+                // setInterval(() => {
+                //     console.log(bump.hitTestRectangle(addOne, arr[0]))
+                // }, 100)
             })
 
 
