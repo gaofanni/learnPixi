@@ -84,7 +84,7 @@ gulp.task('server', function () {
         livereload: true,
         host: '::',
         root: '../',
-        port: 7777,
+        port: 7778,
         middleware: function (connect, opt) {
             return [
                 proxy('/apiRedirect', {

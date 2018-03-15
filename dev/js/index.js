@@ -65,6 +65,7 @@ class App {
         console.log(window.dpr, 'dpr');
         console.log(this.radio2, 'radio2');
         this.mount();
+        console.log(window.devicePixelRatio, 'devicePixelRatio')
         this.draw();
     }
 
@@ -76,19 +77,41 @@ class App {
     }
     draw() {
         let { radio2, stage, group, renderer, Sprite, resources, Graphics, Text, loader, Texture, size, d } = this;
-        this.drawGrapgics()
+        // this.drawGrapgics()
         // this.keyframeAnimation()
         // this.drawSprite()
         // this.drawSriteFromImage()
         // this.drawAnimationLine()
         // this.drwaParticles()
-        // this.drawTiling()
+        this.drawTiling()
+        // this.drawRopeMesh()
         animate()
         function animate() {
             requestAnimationFrame(animate)
             d.update()
             renderer.render(stage)
         }
+    }
+    /* 扭动效果，没成功 */
+    drawRopeMesh() {
+        let { radio2, stage, group, renderer, Sprite, resources, Graphics, Text, loader, Texture, size, d } = this;
+        PIXI.loader
+            .add('./images/assets/rope-stright.png')
+            .load(() => {
+                let numberOfSegments = 20
+                let imageHeight = size(361);
+                let ropeSegment = imageHeight / numberOfSegments;
+                /* 定义弯曲点 */
+                let points = []
+                for (let i = 0; i < numberOfSegments; i++) {
+                    points.push(new PIXI.Point(0, i * ropeSegment))
+                }
+                let snake = new PIXI.mesh.Rope(
+                    PIXI.loader.resources['./images/assets/rope-stright.png'].texture, points
+                )
+
+                stage.addChild(snake)
+            })
     }
     drawTiling() {
         let { radio2, stage, group, renderer, Sprite, resources, Graphics, Text, loader, Texture, size, d } = this;
@@ -143,9 +166,9 @@ class App {
                 function pointerUp(event) {
                     dragging = false;
                 }
-                // setInterval(() => {
-                //     tilingSprite.tilePosition.x -= size(1);
-                // }, 100)
+                setInterval(() => {
+                    tilingSprite.tilePosition.x -= size(1);
+                }, 100)
             })
     }
     /* 粒子动画 */
@@ -311,9 +334,15 @@ class App {
 
         var graphics2 = new Graphics();
         graphics2.beginFill('0x999999').drawEllipse(220 * radio2, 490 * radio2, 70 * radio2, 120 * radio2).endFill();
-        graphics2.blendMode = PIXI.BLEND_MODES.SCREEN
+        /* 混合模式 */
+        // graphics2.blendMode = PIXI.BLEND_MODES.ADD
         // graphics2.blendMode = PIXI.BLEND_MODES.MULTIPLY
         // graphics2.beginFill('0x061639').drawEllipse(220 , 490 , 70 , 120 ).endFill();
+
+        /* 滤镜 */
+        let blurFilter = new PIXI.filters.BlurFilter()
+        blurFilter.blur = 20
+        graphics2.filters = [blurFilter]
 
         //手绘线条
         var line = new Graphics();
