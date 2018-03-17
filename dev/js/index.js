@@ -77,13 +77,13 @@ class App {
     }
     draw() {
         let { radio2, stage, group, renderer, Sprite, resources, Graphics, Text, loader, Texture, size, d } = this;
-        // this.drawGrapgics()
+        this.drawGrapgics()
         // this.keyframeAnimation()
         // this.drawSprite()
         // this.drawSriteFromImage()
         // this.drawAnimationLine()
         // this.drwaParticles()
-        this.drawTiling()
+        // this.drawTiling()
         // this.drawRopeMesh()
         animate()
         function animate() {
@@ -322,18 +322,24 @@ class App {
         gameLoop()
     }
     drawGrapgics() {
-        let { radio2, stage, group, renderer, Sprite, resources, Graphics, Text, loader, Texture, size } = this;
+        let { radio2, stage, group, renderer, Sprite, resources, Graphics, Text, loader, Texture, size, bump } = this;
 
         var graphics = new Graphics();
-        graphics.beginFill('0x061639').lineStyle(1 * radio2, '0xffffff', 1).drawRect(50 * radio2, 250 * radio2, 120 * radio2, 120 * radio2).endFill();
+        graphics.beginFill('0x061639').lineStyle(1 * radio2, '0xffffff', 1).drawRect(0, 0, 120 * radio2, 120 * radio2).endFill();
+        graphics.position.set(size(100), size(270))
+        graphics.rotation = Math.PI / 180 * 45;
 
         var graphics1 = new Graphics();
-        graphics1.beginFill('0xf75555').lineStyle(1 * radio2, '0xffffff', 1).drawRect(100 * radio2, 350 * radio2, 120 * radio2, 120 * radio2).endFill();
-        graphics1.position.set(size(100), size(100))
+        graphics1.beginFill('0xf75555').lineStyle(1 * radio2, '0xffffff', 1).drawRect(0, 0, 120 * radio2, 120 * radio2).endFill();
+        graphics1.position.set(size(130), size(400))
+
+        console.log(bump.hit(graphics, graphics1), 1)
 
 
         var graphics2 = new Graphics();
-        graphics2.beginFill('0x999999').drawEllipse(220 * radio2, 490 * radio2, 70 * radio2, 120 * radio2).endFill();
+        graphics2.beginFill('0x999999').drawEllipse(0, 0, 70 * radio2, 120 * radio2).endFill();
+        graphics2.position.set(size(0), size(440))
+        // graphics2.rotation = Math.PI / 180 * 45;
         /* 混合模式 */
         // graphics2.blendMode = PIXI.BLEND_MODES.ADD
         // graphics2.blendMode = PIXI.BLEND_MODES.MULTIPLY
@@ -342,7 +348,8 @@ class App {
         /* 滤镜 */
         let blurFilter = new PIXI.filters.BlurFilter()
         blurFilter.blur = 20
-        graphics2.filters = [blurFilter]
+        // graphics2.filters = [blurFilter]
+
 
         //手绘线条
         var line = new Graphics();
@@ -427,7 +434,7 @@ class App {
         stage.addChild(group)
     }
     drawSprite() {
-        let { radio2, stage, group, renderer, Sprite, resources, Graphics, Text, loader, Texture, bump } = this;
+        let { radio2, stage, group, renderer, Sprite, resources, Graphics, Text, loader, Texture, bump, size } = this;
         //精灵
         //加载器
         PIXI.loader
@@ -467,6 +474,8 @@ class App {
                     });
                     arr[n].jiasu = true
                     arr[n].forward = true
+                    // arr[n].rotation = Math.PI / 180 * 45;
+                    arr[n].position.set(size(150), 0)
                     arr[n].tint = 0xff3300;/* 染色 */
                     stage.addChild(arr[n])
                 }
@@ -530,18 +539,18 @@ class App {
                 }
                 let state;
                 state = play;
-                function moving() {
-                    requestAnimationFrame(moving)
-                    //自动移动
-                    state()
-                }
-                moving()
+                // function moving() {
+                //     requestAnimationFrame(moving)
+                //     //自动移动
+                //     state()
+                // }
+                // moving()
                 /* Bump碰撞检测 */
-                // let addOne = new Sprite(resources['./images/assets/test.json'].textures['布-L.png']); addOne.position.set(300, 300);
-                // stage.addChild(addOne)
-                // setInterval(() => {
-                //     console.log(bump.hitTestRectangle(addOne, arr[0]))
-                // }, 100)
+                let addOne = new Sprite(resources['./images/assets/test.json'].textures['布-L.png']); addOne.position.set(300, 300);
+                stage.addChild(addOne)
+                setInterval(() => {
+                    console.log(bump.hit(addOne, arr[0]))
+                }, 100)
             })
 
 
